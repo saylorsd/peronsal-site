@@ -1,0 +1,14 @@
+id: ckanext-dataspatial
+name: CKAN Dataspatial extension
+repo: https://github.com/wprdc/ckanext-dataspatial
+description: |
+  A CKAN extension that provides PostGIS support to the CKAN datastore.  
+  This further supports other GIS operations at the resource-record-level including performing 
+  spatial queries and serving map tiles.
+stack:
+  - label: CKAN
+    url: https://ckan.org/
+  - label: SQLAlchemy
+    url: https://www.sqlalchemy.org/
+  - label: PostGIS
+    url: https://postgis.net/

@@ -1,0 +1,28 @@
+id: parcels-n-at
+name: Parcels N'at
+link: https://parcelsnat.org
+linkLabel: parcelsnat.org
+repo: https://github.com/wprdc/wprdc-apps
+description: |
+  Parcels N'at provides a single interface to access a diverse set of property and 
+  housing related datasets across Allegheny County.  Users can explore data parcel-by-parcel,
+  see region-level indicators of aggregate parcel data, and filter, join and download parcel 
+  data in bulk.
+stack:
+  - label: SpaceRAT
+    url: "#spacerat"
+  - label: CKAN
+    url: "#wprdc"
+  - label: React
+    url: https://github.com/facebook/react
+  - label: MapLibre GL
+    url: https://github.com/maplibre/maplibre-gl-js
+  - label: Next.js
+    url: https://nextjs.org/docs
+  - label: React Aria
+    url: https://react-spectrum.adobe.com/react-aria/index.html
+  - label: PostGIS
+    url: https://postgis.net/
+screenshots:
+  - alt: Screenshot of Parcels N'at Explorer
+    src: /images/parcels-n-at/explorer.png

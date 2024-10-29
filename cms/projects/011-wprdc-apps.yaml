@@ -1,0 +1,19 @@
+id: wprdc-apps
+name: WPRDC App Dev Utilities
+repo: https://github.com/wprdc/wprdc-apps
+description: |
+  Supports the development of the WPRDC website and apps.
+  Includes React UI components, TypeScript Types, and APIs for interacting with WPRDC backend tools.
+stack:
+  - label: TypeScript
+    url: https://www.typescriptlang.org/
+  - label: React
+    url: https://github.com/facebook/react
+  - label: MapLibre GL
+    url: https://github.com/maplibre/maplibre-gl-js
+  - label: Next.js
+    url: https://nextjs.org/docs
+  - label: React Aria
+    url: https://react-spectrum.adobe.com/react-aria/index.html
+  - label: Turborepo
+    url: https://turbo.build/repo/docs

@@ -1,0 +1,16 @@
+id: spacerat
+name: SpaceRAT
+repo: https://www.github.com/wprdc/spacerat
+description: |
+  The Spatial-Relational Aggregation Toolkit (SpaceRAT) is a python library 
+  that provides tools to map a colloquial civic tech ontology onto the database
+  of a regional open data portal with heterogeneous sources and publishers.
+stack:
+  - label: Python
+    url: https://python.org
+  - label: SQLAlchemy
+    url: https://www.sqlalchemy.org/
+  - label: Flask
+    url: https://github.com/pallets/flask
+  - label: PostGIS
+    url: https://postgis.net/

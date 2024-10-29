@@ -1,0 +1,13 @@
+id: wprdc
+name: WPRDC CKAN Deployment and Theme
+link: https://www.wprdc.org
+repo: https://github.com/wprdc/ckan-docker
+description: |
+  My work at the Western PA Regional Data Center includes maintaining our CKAN deployment and theme extension.
+stack:
+  - label: CKAN
+    url: https://ckan.org/
+  - label: Docker
+    url: https://www.docker.com/
+  - label: Martin
+    url: https://martin.maplibre.org/

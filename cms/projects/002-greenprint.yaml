@@ -1,0 +1,18 @@
+id: greenprint
+name: Greenprint
+link: https://www.wprdc.org/greenprint
+repo: https://github.com/wprdc/greenprint
+description: |
+  Winner of a PA [Governor's Award for Environmental Excellence](https://www.dep.pa.gov/About/Awards/EnvironmentalExcellence/Pages/2019-Winners.aspx) in 2019.
+  Intersectional analysis tool built with Allegheny Land Trust that allows users to map current open spatial data with an environmental focus.  Users can also explore details about parcels.
+stack:
+  - label: MapLibre GL
+    url: https://github.com/maplibre/maplibre-gl-js
+  - label: React
+    url: "https://github.com/facebook/react"
+  - label: Next.js
+    url: https://nextjs.org/docs
+  - label: React Aria
+    url: https://react-spectrum.adobe.com/react-aria/index.html
+  - label: CKAN
+    url: "#wprdc"
