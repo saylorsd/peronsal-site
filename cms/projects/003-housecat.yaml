@@ -1,12 +1,13 @@
-id: housecat
-name: HouseCat
-link: https://housecatpgh.org
-linkLabel: housecatpgh.org
-repo: https://github.com/wprdc/ckanext-dataspatial
+slug: housecat
+title: HouseCat
 description: |
   The HouseCat affordable housing catalog provides a user-friendly GIS interface to explore messy data 
   from various sources about housing projects in Allegheny County. Access is controlled by a local
   affordable housing preservation coalition.
+link:
+  url: https://housecatpgh.org
+  label: housecatpgh.org
+repo: https://github.com/wprdc/housecat
 stack:
   - label: MapLibre GL
     url: https://github.com/maplibre/maplibre-gl-js

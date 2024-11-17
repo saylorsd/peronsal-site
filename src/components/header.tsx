@@ -3,9 +3,7 @@ export function Header() {
     <header>
       <div>
         <h1>Steve Saylor </h1>
-        <div className="tight">
-          Full-stack developer, civic technologist, GIS specialist{" "}
-        </div>
+        <div className="tight">full-stack developer, civic technologist</div>
       </div>
       <nav className="mainNav">
         <ul>
@@ -15,7 +13,10 @@ export function Header() {
             </a>
           </li>
           <li>
-            <a href="/work">Projects</a>
+            <a href="/portfolio">Portfolio</a>
+          </li>
+          <li>
+            <a href="/lab">Side Projects</a>
           </li>
           <li>
             <a href="/bit">😼Bit</a>

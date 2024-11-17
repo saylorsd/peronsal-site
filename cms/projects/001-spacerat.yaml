@@ -1,5 +1,5 @@
-id: spacerat
-name: SpaceRAT
+slug: spacerat
+title: SpaceRAT
 repo: https://www.github.com/wprdc/spacerat
 description: |
   The Spatial-Relational Aggregation Toolkit (SpaceRAT) is a python library 

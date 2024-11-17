@@ -1,7 +1,8 @@
-id: parcels-n-at
-name: Parcels N'at
-link: https://parcelsnat.org
-linkLabel: parcelsnat.org
+slug: parcels-n-at
+title: Parcels N'at
+link:
+  url: https://parcelsnat.org
+  linkLabel: parcelsnat.org
 repo: https://github.com/wprdc/wprdc-apps
 description: |
   Parcels N'at provides a single interface to access a diverse set of property and 

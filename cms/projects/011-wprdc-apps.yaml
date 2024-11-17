@@ -1,9 +1,9 @@
-id: wprdc-apps
-name: WPRDC App Dev Utilities
-repo: https://github.com/wprdc/wprdc-apps
+slug: wprdc-apps
+title: WPRDC App Dev Utilities
 description: |
   Supports the development of the WPRDC website and apps.
   Includes React UI components, TypeScript Types, and APIs for interacting with WPRDC backend tools.
+repo: https://github.com/wprdc/wprdc-apps
 stack:
   - label: TypeScript
     url: https://www.typescriptlang.org/

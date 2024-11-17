@@ -34,8 +34,8 @@ Based on https://github.com/owickstrom/the-monospace-web
     -45deg,
     var(--background-color),
     var(--background-color) 10px,
-    rgb(82, 82, 91, 0.2) 10px,
-    rgb(82, 82, 91, 0.2) 25px
+    rgb(82, 82, 91, 0.15) 10px,
+    rgb(82, 82, 91, 0.15) 25px
   );
 
 
@@ -93,10 +93,16 @@ body {
   }
 }
 
-h1, h2, h3, h4, h5, h6 {
+h2, h3, h4, h5, h6 {
   font-weight: var(--font-weight-bold);
-  margin: calc(var(--line-height) * 2) 0 var(--line-height);
-  line-height: var(--line-height);
+}
+
+article.content h2{
+  background: var(--text-color);
+  color: var(--background-color);
+  padding: .5rem;
+  margin-top: calc(var(--line-height) * 2);
+
 }
 
 h1 {
@@ -107,11 +113,17 @@ h1 {
 }
 
 h2 {
+  padding-top: .35rem;
+  padding-bottom: .35rem;
   font-size: 2.25rem;
   line-height: normal;
   text-transform: uppercase;
   margin-top: 0;
   margin-bottom: calc(var(--line-height))
+}
+
+h3 {
+  font-size: 2rem;
 }
 
 
@@ -270,9 +282,18 @@ code {
 }
 
 figure {
-  margin: 0;
+  margin: calc(var(--line-height)) var(--line-height);
   border: var(--border-thickness) solid var(--text-color);
+  max-width: 100%;
+  background: var(--stripe-background-light);
 }
+
+figure > img {
+  max-width: 100%;
+  margin: 0 auto;
+  display: block;
+}
+
 
 figcaption {
   display: block;
@@ -282,7 +303,8 @@ figcaption {
 
   border-top: var(--border-thickness) solid var(--text-color);
   padding: calc(var(--line-height) / 2);
-  margin: 0
+  margin: 0;
+  background: white;
 }
 
 
@@ -522,9 +544,15 @@ ul.inline-list li {
 }
 
 
+
+
 article.card {
+  padding: calc(var(--line-height)) 0 ;
 }
 
+
+
+article.card > h3 { margin-top: 0; }
 
 article > h2,
 article > h3,
@@ -532,16 +560,23 @@ article > h4 {
 }
 
 h3 {
-  border-top: 2px solid var(--text-color);
-  padding-top: 1ch;
-  font-size: 1.8rem;
   line-height: 2rem;
 }
 
 ul.article-list {
   list-style: none;
   padding: 0;
-  margin: 0;
+  margin: calc(2 * var(--line-height))  0;
+}
+
+ul.article-list > li {
+  border-top: var(--border-thickness) solid var(--text-color);
+
+}
+
+ul.article-list > li:last-child {
+  border-bottom: var(--border-thickness) solid var(--text-color);
+
 }
 
 button.image-button {
@@ -639,4 +674,22 @@ dialog.image-dialog div.image-container img {
 
 main {
   padding-bottom: calc(var(--line-height) * 6);
+}
+
+.hero {
+  background: var(--stripe-background-light);
+  padding: calc(var(--line-height) / 2);
+  margin-bottom: calc(var(--line-height) * 2);
+  border: 1px solid #CCC;
+  text-align: center;
+  font-weight: var(--font-weight-bold);
+
+}
+
+.hero > h1 {
+  margin: 0;
+}
+
+.hero > p {
+  font-style: italic;
 }

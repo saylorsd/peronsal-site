@@ -1,11 +1,13 @@
-id: social-media-tracker
-name: Social Media Election Policies Tracker
-link: https://apps.cyber.pitt.edu/social-media-election-policies
-linkLabel: apps.cyber.pitt.edu/social-media-election-policies
-repo: https://github.com/WPRDC/pdl-social-media-policy-tracker
+slug: social-media-tracker
+title: Social Media Election Policies Tracker
 description: |
   The Social Media Election Policy Tracker is a tool built with Pitt Cyber to broadly chronicle a timeline of selected social media
   companies’ evolving policies which have impacted the information environment related to U.S. elections and campaigns from 2016 – the present.
+
+link:
+  url: https://apps.cyber.pitt.edu/social-media-election-policies
+  label: apps.cyber.pitt.edu/social-media-election-policies
+repo: https://github.com/WPRDC/pdl-social-media-policy-tracker
 stack:
   - label: React
     url: "https://github.com/facebook/react"
