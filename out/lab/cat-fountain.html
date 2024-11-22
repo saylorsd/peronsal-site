@@ -1,0 +1,199 @@
+<!DOCTYPE html><html><head><meta charSet="utf-8" data-next-head=""/><meta name="viewport" content="width=device-width" data-next-head=""/><link rel="preload" href="/_next/static/media/c1ab11b3d2850569-s.p.woff2" as="font" type="font/woff2" crossorigin="anonymous" data-next-font="size-adjust"/><link rel="preload" href="/_next/static/media/618564c0002d7eaf-s.p.woff2" as="font" type="font/woff2" crossorigin="anonymous" data-next-font="size-adjust"/><link rel="preload" href="/_next/static/css/ecbe330f15a0deef.css" as="style"/><link rel="stylesheet" href="/_next/static/css/ecbe330f15a0deef.css" data-n-g=""/><noscript data-n-css=""></noscript><script defer="" nomodule="" src="/_next/static/chunks/polyfills-42372ed130431b0a.js"></script><script src="/_next/static/chunks/webpack-8cac0b4b405cede1.js" defer=""></script><script src="/_next/static/chunks/framework-a6b3d2fb26bce5d1.js" defer=""></script><script src="/_next/static/chunks/main-007eb23af4609204.js" defer=""></script><script src="/_next/static/chunks/pages/_app-feaf47522708a766.js" defer=""></script><script src="/_next/static/chunks/pages/lab/%5Bslug%5D-56e241e1e93cd8c2.js" defer=""></script><script src="/_next/static/YRmuQkL-rFJD9PCMqgsSV/_buildManifest.js" defer=""></script><script src="/_next/static/YRmuQkL-rFJD9PCMqgsSV/_ssgManifest.js" defer=""></script></head><body><div id="__next"><main class="__className_8a0362"><header><div><h1>Steve Saylor </h1><div class="tight">full-stack developer, civic technologist</div></div><nav class="mainNav"><ul><li><a aria-current="page" href="/">Home</a></li><li><a href="/portfolio">Portfolio</a></li><li><a href="/lab">Side Projects</a></li><li><a href="/bit">😼Bit</a></li></ul></nav></header><hr/><main><article class="content"><div class="hero"><h1>Reverse Engineering my Cat&#x27;s Water Fountain</h1></div><div><p>I have one of <a href="https://petkit.com/products/eversweet-solo-2">these water fountains</a> for my cat. It comes with an app,
+and from what I could tell, it was using Bluetooth Low Energy (Bluetooth LE, BLE) for communicating with the fountain. I
+really don't
+want to use the company's app for privacy and security reasons. I also think that reverse engineering the fountain's API
+will lead to other fun projects like building a new app and integrating my own smart home features.</p>
+<p>So far, I've been able to reverse engineer a bit of how the fountain and app work. Here's my best attempt collect
+notes and document what I did a while ago. It is not complete, but I plan to clean this up and add more in the future.</p>
+<h2>Packet Sniffing</h2>
+<p>I knew I would need to sniff the packets being sent between my phone and the fountain. Some web searching led
+me <a href="https://novelbits.io/nordic-ble-sniffer-guide-using-nrf52840-wireshark/">a post</a> which led me to try
+the packet sniffing software <a href="https://www.wireshark.org/">Wireshark</a> with a BLE plugin, and
+a <a href="https://www.nordicsemi.com/Products/Development-hardware/nrf52840-dongle">nRF52840 BLE development dongle</a> from
+Nordic Semiconductor.</p>
+<p>To use the dongle to sniff packets (i.e. simply listen to and report them), I need to install
+the <a href="https://www.nordicsemi.com/Products/Development-tools/nRF-Sniffer-for-Bluetooth-LE">sniffer firmware</a>
+using <a href="https://www.nordicsemi.com/Products/Development-tools/nRF-Connect-for-Desktop">Nordic's desktop software</a>.</p>
+<figure>
+<img src="/images/side-projects/cat-fountain/nrf.gif" height="400px" alt="NRF dongle sniffing away">
+<figcaption>nRF dongle sniffing packets</figcaption>
+</figure>
+
+<p>With the sniffer running in wireshark without any further filtering, I was looking at a firehose of all the bluetooth
+packets flying around me. Luckily wireshark allows for lots of filters and I could filter to just the packets from and
+for the fountain.</p>
+<figure>
+<img src="/images/side-projects/cat-fountain/sniffing.gif" alt="Sniffing">
+<figcaption>Wireshark output of communications between fountain and my phone</figcaption>
+</figure>
+
+
+<p>The next thing I did was explore the packets while playing with the app. I discovered that communication was done
+using <a href="https://en.wikipedia.org/wiki/Bluetooth_Low_Energy#Software_model">GATT</a> and from there I was able to narrow now
+the packets to the ones I wanted as Wireshark labeled the protocol being used in the packet.</p>
+<p>Exploring the (G)ATT packets I found the payload data being sent and started to explore it. I updated Wireshark to
+report the payload data and then I exported it to excel to play around with it.</p>
+<h2>Examining raw data</h2>
+<h3>Fountain control commands</h3>
+<p>I started playing with the data and a <a href="https://bleak.readthedocs.io/en/latest/">Python BLE library</a> and was able to
+reverse engineer the On/Off switch of the fountain. One interesting thing I noticed was a few bytes used to keep track
+of a sequence. If you send a command with teh sequence bytes behind, the fountain will ignore it.</p>
+<p><em>This python script shows my breakdown of the bytes sent by the app and can send on and off requests to the fountain.</em></p>
+<pre><code class="hljs language-python"><span class="hljs-keyword">import</span> asyncio
+<span class="hljs-keyword">import</span> os
+<span class="hljs-keyword">from</span> pathlib <span class="hljs-keyword">import</span> Path
+
+<span class="hljs-keyword">from</span> bleak <span class="hljs-keyword">import</span> BleakClient, BleakScanner, BleakGATTCharacteristic
+
+NAME = <span class="hljs-string">'Petkit_CTW2'</span>
+
+<span class="hljs-comment"># CHARACTERISTICS</span>
+CHAR13 = <span class="hljs-string">'0000aaa2-0000-1000-8000-00805f9b34fb'</span>  <span class="hljs-comment"># Petkit_CTW2_TX</span>
+CHAR16 = <span class="hljs-string">'0000aaa1-0000-1000-8000-00805f9b34fb'</span>  <span class="hljs-comment"># Petkit_CTW2_RX</span>
+
+<span class="hljs-comment"># DESCRIPTORS</span>
+DESC15 = <span class="hljs-string">'00002901-0000-1000-8000-00805f9b34fb'</span>  <span class="hljs-comment"># CHAR13  - bytearray(b'Petkit_CTW2_TX')</span>
+DESC18 = <span class="hljs-string">'00002902-0000-1000-8000-00805f9b34fb'</span>  <span class="hljs-comment"># CHAR16  - bytearray(b'')</span>
+DESC19 = <span class="hljs-string">'00002901-0000-1000-8000-00805f9b34fb'</span>  <span class="hljs-comment"># CHAR16  - bytearray(b'Petkit_CTW2_RX')</span>
+
+<span class="hljs-comment"># SERVICES</span>
+SERV12 = <span class="hljs-string">'0000aaa0-0000-1000-8000-00805f9b34fb'</span>
+
+<span class="hljs-comment"># DATA PARTS</span>
+MAGIC_NUMBER = <span class="hljs-string">b'\xFA\xFC\xFD'</span>
+PAUSE_CMD = <span class="hljs-string">b'\xDC'</span>
+SOMETHING = <span class="hljs-string">b'\x02\x00'</span>
+ON = <span class="hljs-string">b'\x01'</span>
+OFF = <span class="hljs-string">b'\x00'</span>
+END = <span class="hljs-string">b'\x01\xFB'</span>
+
+DIR = Path(os.path.dirname(os.path.realpath(__file__)))
+
+INIT_CMD = <span class="hljs-string">b'\xD5'</span>
+
+INIT_MESSAGE = MAGIC_NUMBER  + INIT_CMD + <span class="hljs-string">b'\x01\x00\x00\x00\xfb'</span>
+
+
+WRITE_CHAR = CHAR13
+READ_CHAR = CHAR16
+
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">get_next_sequence</span>() -&gt; <span class="hljs-built_in">int</span>:
+    file_name = DIR / <span class="hljs-string">'sequence'</span>
+    <span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(file_name, <span class="hljs-string">'r'</span>) <span class="hljs-keyword">as</span> f:
+        seq = <span class="hljs-built_in">int</span>(f.readline())
+
+    <span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(DIR / <span class="hljs-string">'sequence'</span>, <span class="hljs-string">'w'</span>) <span class="hljs-keyword">as</span> f:
+        f.write(<span class="hljs-built_in">str</span>(seq + <span class="hljs-number">1</span>))
+    <span class="hljs-keyword">return</span> seq
+
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">get_pause_data</span>(<span class="hljs-params">pause: <span class="hljs-built_in">bool</span>, seq: <span class="hljs-built_in">int</span></span>) -&gt; <span class="hljs-built_in">bytes</span>:
+    <span class="hljs-string">"""
+    Generates data packet to pause or restart the fountain.
+
+    The fountain will automatically restart in 10 mins.
+
+    :param pause: If true, pause the fountain otherwise restart it.
+    :param seq: current sequence number. must be greater than last one used.
+    :return:
+    """</span>
+    signal = OFF <span class="hljs-keyword">if</span> pause <span class="hljs-keyword">else</span> ON
+    seq = seq.to_bytes(<span class="hljs-number">2</span>, <span class="hljs-string">'big'</span>)
+    <span class="hljs-keyword">return</span> MAGIC_NUMBER + PAUSE_CMD + seq + SOMETHING + signal + END
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">callback</span>(<span class="hljs-params">sender: BleakGATTCharacteristic, data: <span class="hljs-built_in">bytearray</span></span>):
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f"NOTIFY:  <span class="hljs-subst">{data.<span class="hljs-built_in">hex</span>()}</span>"</span>)
+
+
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">def</span> <span class="hljs-title function_">main</span>():
+    scanner = BleakScanner()
+    fountain = <span class="hljs-keyword">await</span> scanner.find_device_by_name(NAME)
+
+    client = BleakClient(fountain)
+
+
+    <span class="hljs-keyword">try</span>:
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">'Connecting'</span>)
+        <span class="hljs-keyword">await</span> client.connect()
+        <span class="hljs-keyword">await</span> client.start_notify(<span class="hljs-number">16</span>, callback)
+
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f'SENDING: <span class="hljs-subst">{INIT_MESSAGE.<span class="hljs-built_in">hex</span>()}</span>'</span>)
+        <span class="hljs-keyword">await</span> client.write_gatt_char(WRITE_CHAR, INIT_MESSAGE)
+
+        <span class="hljs-keyword">await</span> asyncio.sleep(<span class="hljs-number">4</span>)
+
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">'Closing connection.'</span>)
+        <span class="hljs-keyword">await</span> client.stop_notify(CHAR16)
+
+
+    <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+        <span class="hljs-built_in">print</span>(e)
+    <span class="hljs-keyword">finally</span>:
+        <span class="hljs-keyword">await</span> client.disconnect()
+
+
+asyncio.run(main())
+</code></pre><p><strong>🎉 I can now pause the fountain without the app.</strong></p>
+<h3>App display data</h3>
+<p>The next part of the fountain's interface that I want to reverse engineer is the data it sends to the app to be
+displayed. To do this, my plan is to capture the packet communication when the app starts up and compare the data to
+what I see in the app and the differences between runs.</p>
+<figure>
+<img src="/images/side-projects/cat-fountain/startup-data.png" alt="startup-data.png">
+<figcaption>Looking at app startup packets.  The data that populates the apps.</figcaption>
+</figure>
+
+<br>
+
+
+<figure>
+<img src="/images/side-projects/cat-fountain/startup-comparisons.png" alt="startup-comparisons.png">
+<figcaption>Comparing a few startup communications with app states</figcaption>
+</figure>
+
+<p><strong>📌 I'm here now</strong></p>
+<h2>Extra notes about packets</h2>
+<p><strong>When the app connects, it sends these two every time.</strong></p>
+<pre><code class="hljs">fafcfdd501000000fb
+fafcfd560101080000008767fea7039dfb
+</code></pre><p><strong>The first signal seems to trigger this response:</strong></p>
+<pre><code class="hljs">fafcfdd5020016000000000005f73b713230323430353135573231313237fb
+</code></pre><p><em>I captured this same response value on two of the app init captures. The third init attempt didn't capture any response
+at this point.</em></p>
+<p>like other data, it starts with <code>fafcfd</code></p>
+<p>The first byte seems to represent an identifier of what the rest of the data is for - like a command name or endpoint or
+something. Each response starts withe the same byte.</p>
+<p>The sequence when the app connects:</p>
+<ul>
+<li><code>d5</code></li>
+<li><code>56</code></li>
+<li><code>54</code></li>
+<li><code>c8</code></li>
+<li><code>c9</code></li>
+<li><code>d3</code></li>
+<li><code>d4</code></li>
+<li><code>d7</code></li>
+<li><code>d8</code></li>
+<li><em>(receives an <code>e6</code> response)</em></li>
+<li><code>e6</code> - <em>final command, seems like an acknowledgment</em></li>
+</ul>
+<p>The next byte seems to be some sort of call/response sequence. The sender uses <code>01</code> and the replier uses <code>02</code></p>
+<p>The next byte looks like a sequence that increments with each request.</p>
+<p><strong>first response (SEQ = 00)</strong></p>
+<pre><code class="hljs">1600000000000 5f73b7132303234303531355732313132 77
+1600000000000 5f73b7132303234303531355732313132 37
+</code></pre><p><strong>3rd command (only one that's different between two two runs i'm looking at)</strong></p>
+<pre><code class="hljs">070000 2e82 5340 0800
+070000 2e8b 25a4 0800
+</code></pre><p><strong>5th response (SEQ = 05)</strong></p>
+<pre><code class="hljs">18000000000000000000 0019ea6c0019df14 0000000000000000
+18000000000000000000 0022b92c0022b160 0000000000000000
+</code></pre><p><strong>6th response</strong></p>
+<pre><code class="hljs">10000101 0000000000 19df1422 010000 007f
+10000101 0000000000 22b1600c 010000 e9e7
+</code></pre><p><strong>final response</strong></p>
+<pre><code class="hljs">98 1e0001010000000000 19df16220100000081 03030102000005a0000528010000
+a5 1e0001010000000000 22b1610c010000e9e8 03030102000005a0000528010000
+</code></pre></div>;</article></main></main></div><script id="__NEXT_DATA__" type="application/json">{"props":{"pageProps":{"project":{"attributes":{"title":"Reverse Engineering my Cat's Water Fountain","slug":"cat-fountain","description":"My new pet water fountain comes with an app which is both neat and troublesome. I want to reverse engineer how it operates so I can use my own app to control and monitor it.\n","order":0},"body":"\u003cp\u003eI have one of \u003ca href=\"https://petkit.com/products/eversweet-solo-2\"\u003ethese water fountains\u003c/a\u003e for my cat. It comes with an app,\nand from what I could tell, it was using Bluetooth Low Energy (Bluetooth LE, BLE) for communicating with the fountain. I\nreally don't\nwant to use the company's app for privacy and security reasons. I also think that reverse engineering the fountain's API\nwill lead to other fun projects like building a new app and integrating my own smart home features.\u003c/p\u003e\n\u003cp\u003eSo far, I've been able to reverse engineer a bit of how the fountain and app work. Here's my best attempt collect\nnotes and document what I did a while ago. It is not complete, but I plan to clean this up and add more in the future.\u003c/p\u003e\n\u003ch2\u003ePacket Sniffing\u003c/h2\u003e\n\u003cp\u003eI knew I would need to sniff the packets being sent between my phone and the fountain. Some web searching led\nme \u003ca href=\"https://novelbits.io/nordic-ble-sniffer-guide-using-nrf52840-wireshark/\"\u003ea post\u003c/a\u003e which led me to try\nthe packet sniffing software \u003ca href=\"https://www.wireshark.org/\"\u003eWireshark\u003c/a\u003e with a BLE plugin, and\na \u003ca href=\"https://www.nordicsemi.com/Products/Development-hardware/nrf52840-dongle\"\u003enRF52840 BLE development dongle\u003c/a\u003e from\nNordic Semiconductor.\u003c/p\u003e\n\u003cp\u003eTo use the dongle to sniff packets (i.e. simply listen to and report them), I need to install\nthe \u003ca href=\"https://www.nordicsemi.com/Products/Development-tools/nRF-Sniffer-for-Bluetooth-LE\"\u003esniffer firmware\u003c/a\u003e\nusing \u003ca href=\"https://www.nordicsemi.com/Products/Development-tools/nRF-Connect-for-Desktop\"\u003eNordic's desktop software\u003c/a\u003e.\u003c/p\u003e\n\u003cfigure\u003e\n\u003cimg src=\"/images/side-projects/cat-fountain/nrf.gif\" height=\"400px\" alt=\"NRF dongle sniffing away\"\u003e\n\u003cfigcaption\u003enRF dongle sniffing packets\u003c/figcaption\u003e\n\u003c/figure\u003e\n\n\u003cp\u003eWith the sniffer running in wireshark without any further filtering, I was looking at a firehose of all the bluetooth\npackets flying around me. Luckily wireshark allows for lots of filters and I could filter to just the packets from and\nfor the fountain.\u003c/p\u003e\n\u003cfigure\u003e\n\u003cimg src=\"/images/side-projects/cat-fountain/sniffing.gif\" alt=\"Sniffing\"\u003e\n\u003cfigcaption\u003eWireshark output of communications between fountain and my phone\u003c/figcaption\u003e\n\u003c/figure\u003e\n\n\n\u003cp\u003eThe next thing I did was explore the packets while playing with the app. I discovered that communication was done\nusing \u003ca href=\"https://en.wikipedia.org/wiki/Bluetooth_Low_Energy#Software_model\"\u003eGATT\u003c/a\u003e and from there I was able to narrow now\nthe packets to the ones I wanted as Wireshark labeled the protocol being used in the packet.\u003c/p\u003e\n\u003cp\u003eExploring the (G)ATT packets I found the payload data being sent and started to explore it. I updated Wireshark to\nreport the payload data and then I exported it to excel to play around with it.\u003c/p\u003e\n\u003ch2\u003eExamining raw data\u003c/h2\u003e\n\u003ch3\u003eFountain control commands\u003c/h3\u003e\n\u003cp\u003eI started playing with the data and a \u003ca href=\"https://bleak.readthedocs.io/en/latest/\"\u003ePython BLE library\u003c/a\u003e and was able to\nreverse engineer the On/Off switch of the fountain. One interesting thing I noticed was a few bytes used to keep track\nof a sequence. If you send a command with teh sequence bytes behind, the fountain will ignore it.\u003c/p\u003e\n\u003cp\u003e\u003cem\u003eThis python script shows my breakdown of the bytes sent by the app and can send on and off requests to the fountain.\u003c/em\u003e\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"hljs language-python\"\u003e\u003cspan class=\"hljs-keyword\"\u003eimport\u003c/span\u003e asyncio\n\u003cspan class=\"hljs-keyword\"\u003eimport\u003c/span\u003e os\n\u003cspan class=\"hljs-keyword\"\u003efrom\u003c/span\u003e pathlib \u003cspan class=\"hljs-keyword\"\u003eimport\u003c/span\u003e Path\n\n\u003cspan class=\"hljs-keyword\"\u003efrom\u003c/span\u003e bleak \u003cspan class=\"hljs-keyword\"\u003eimport\u003c/span\u003e BleakClient, BleakScanner, BleakGATTCharacteristic\n\nNAME = \u003cspan class=\"hljs-string\"\u003e'Petkit_CTW2'\u003c/span\u003e\n\n\u003cspan class=\"hljs-comment\"\u003e# CHARACTERISTICS\u003c/span\u003e\nCHAR13 = \u003cspan class=\"hljs-string\"\u003e'0000aaa2-0000-1000-8000-00805f9b34fb'\u003c/span\u003e  \u003cspan class=\"hljs-comment\"\u003e# Petkit_CTW2_TX\u003c/span\u003e\nCHAR16 = \u003cspan class=\"hljs-string\"\u003e'0000aaa1-0000-1000-8000-00805f9b34fb'\u003c/span\u003e  \u003cspan class=\"hljs-comment\"\u003e# Petkit_CTW2_RX\u003c/span\u003e\n\n\u003cspan class=\"hljs-comment\"\u003e# DESCRIPTORS\u003c/span\u003e\nDESC15 = \u003cspan class=\"hljs-string\"\u003e'00002901-0000-1000-8000-00805f9b34fb'\u003c/span\u003e  \u003cspan class=\"hljs-comment\"\u003e# CHAR13  - bytearray(b'Petkit_CTW2_TX')\u003c/span\u003e\nDESC18 = \u003cspan class=\"hljs-string\"\u003e'00002902-0000-1000-8000-00805f9b34fb'\u003c/span\u003e  \u003cspan class=\"hljs-comment\"\u003e# CHAR16  - bytearray(b'')\u003c/span\u003e\nDESC19 = \u003cspan class=\"hljs-string\"\u003e'00002901-0000-1000-8000-00805f9b34fb'\u003c/span\u003e  \u003cspan class=\"hljs-comment\"\u003e# CHAR16  - bytearray(b'Petkit_CTW2_RX')\u003c/span\u003e\n\n\u003cspan class=\"hljs-comment\"\u003e# SERVICES\u003c/span\u003e\nSERV12 = \u003cspan class=\"hljs-string\"\u003e'0000aaa0-0000-1000-8000-00805f9b34fb'\u003c/span\u003e\n\n\u003cspan class=\"hljs-comment\"\u003e# DATA PARTS\u003c/span\u003e\nMAGIC_NUMBER = \u003cspan class=\"hljs-string\"\u003eb'\\xFA\\xFC\\xFD'\u003c/span\u003e\nPAUSE_CMD = \u003cspan class=\"hljs-string\"\u003eb'\\xDC'\u003c/span\u003e\nSOMETHING = \u003cspan class=\"hljs-string\"\u003eb'\\x02\\x00'\u003c/span\u003e\nON = \u003cspan class=\"hljs-string\"\u003eb'\\x01'\u003c/span\u003e\nOFF = \u003cspan class=\"hljs-string\"\u003eb'\\x00'\u003c/span\u003e\nEND = \u003cspan class=\"hljs-string\"\u003eb'\\x01\\xFB'\u003c/span\u003e\n\nDIR = Path(os.path.dirname(os.path.realpath(__file__)))\n\nINIT_CMD = \u003cspan class=\"hljs-string\"\u003eb'\\xD5'\u003c/span\u003e\n\nINIT_MESSAGE = MAGIC_NUMBER  + INIT_CMD + \u003cspan class=\"hljs-string\"\u003eb'\\x01\\x00\\x00\\x00\\xfb'\u003c/span\u003e\n\n\nWRITE_CHAR = CHAR13\nREAD_CHAR = CHAR16\n\n\n\u003cspan class=\"hljs-keyword\"\u003edef\u003c/span\u003e \u003cspan class=\"hljs-title function_\"\u003eget_next_sequence\u003c/span\u003e() -\u0026gt; \u003cspan class=\"hljs-built_in\"\u003eint\u003c/span\u003e:\n    file_name = DIR / \u003cspan class=\"hljs-string\"\u003e'sequence'\u003c/span\u003e\n    \u003cspan class=\"hljs-keyword\"\u003ewith\u003c/span\u003e \u003cspan class=\"hljs-built_in\"\u003eopen\u003c/span\u003e(file_name, \u003cspan class=\"hljs-string\"\u003e'r'\u003c/span\u003e) \u003cspan class=\"hljs-keyword\"\u003eas\u003c/span\u003e f:\n        seq = \u003cspan class=\"hljs-built_in\"\u003eint\u003c/span\u003e(f.readline())\n\n    \u003cspan class=\"hljs-keyword\"\u003ewith\u003c/span\u003e \u003cspan class=\"hljs-built_in\"\u003eopen\u003c/span\u003e(DIR / \u003cspan class=\"hljs-string\"\u003e'sequence'\u003c/span\u003e, \u003cspan class=\"hljs-string\"\u003e'w'\u003c/span\u003e) \u003cspan class=\"hljs-keyword\"\u003eas\u003c/span\u003e f:\n        f.write(\u003cspan class=\"hljs-built_in\"\u003estr\u003c/span\u003e(seq + \u003cspan class=\"hljs-number\"\u003e1\u003c/span\u003e))\n    \u003cspan class=\"hljs-keyword\"\u003ereturn\u003c/span\u003e seq\n\n\n\u003cspan class=\"hljs-keyword\"\u003edef\u003c/span\u003e \u003cspan class=\"hljs-title function_\"\u003eget_pause_data\u003c/span\u003e(\u003cspan class=\"hljs-params\"\u003epause: \u003cspan class=\"hljs-built_in\"\u003ebool\u003c/span\u003e, seq: \u003cspan class=\"hljs-built_in\"\u003eint\u003c/span\u003e\u003c/span\u003e) -\u0026gt; \u003cspan class=\"hljs-built_in\"\u003ebytes\u003c/span\u003e:\n    \u003cspan class=\"hljs-string\"\u003e\"\"\"\n    Generates data packet to pause or restart the fountain.\n\n    The fountain will automatically restart in 10 mins.\n\n    :param pause: If true, pause the fountain otherwise restart it.\n    :param seq: current sequence number. must be greater than last one used.\n    :return:\n    \"\"\"\u003c/span\u003e\n    signal = OFF \u003cspan class=\"hljs-keyword\"\u003eif\u003c/span\u003e pause \u003cspan class=\"hljs-keyword\"\u003eelse\u003c/span\u003e ON\n    seq = seq.to_bytes(\u003cspan class=\"hljs-number\"\u003e2\u003c/span\u003e, \u003cspan class=\"hljs-string\"\u003e'big'\u003c/span\u003e)\n    \u003cspan class=\"hljs-keyword\"\u003ereturn\u003c/span\u003e MAGIC_NUMBER + PAUSE_CMD + seq + SOMETHING + signal + END\n\n\u003cspan class=\"hljs-keyword\"\u003edef\u003c/span\u003e \u003cspan class=\"hljs-title function_\"\u003ecallback\u003c/span\u003e(\u003cspan class=\"hljs-params\"\u003esender: BleakGATTCharacteristic, data: \u003cspan class=\"hljs-built_in\"\u003ebytearray\u003c/span\u003e\u003c/span\u003e):\n    \u003cspan class=\"hljs-built_in\"\u003eprint\u003c/span\u003e(\u003cspan class=\"hljs-string\"\u003ef\"NOTIFY:  \u003cspan class=\"hljs-subst\"\u003e{data.\u003cspan class=\"hljs-built_in\"\u003ehex\u003c/span\u003e()}\u003c/span\u003e\"\u003c/span\u003e)\n\n\n\n\u003cspan class=\"hljs-keyword\"\u003easync\u003c/span\u003e \u003cspan class=\"hljs-keyword\"\u003edef\u003c/span\u003e \u003cspan class=\"hljs-title function_\"\u003emain\u003c/span\u003e():\n    scanner = BleakScanner()\n    fountain = \u003cspan class=\"hljs-keyword\"\u003eawait\u003c/span\u003e scanner.find_device_by_name(NAME)\n\n    client = BleakClient(fountain)\n\n\n    \u003cspan class=\"hljs-keyword\"\u003etry\u003c/span\u003e:\n        \u003cspan class=\"hljs-built_in\"\u003eprint\u003c/span\u003e(\u003cspan class=\"hljs-string\"\u003e'Connecting'\u003c/span\u003e)\n        \u003cspan class=\"hljs-keyword\"\u003eawait\u003c/span\u003e client.connect()\n        \u003cspan class=\"hljs-keyword\"\u003eawait\u003c/span\u003e client.start_notify(\u003cspan class=\"hljs-number\"\u003e16\u003c/span\u003e, callback)\n\n        \u003cspan class=\"hljs-built_in\"\u003eprint\u003c/span\u003e(\u003cspan class=\"hljs-string\"\u003ef'SENDING: \u003cspan class=\"hljs-subst\"\u003e{INIT_MESSAGE.\u003cspan class=\"hljs-built_in\"\u003ehex\u003c/span\u003e()}\u003c/span\u003e'\u003c/span\u003e)\n        \u003cspan class=\"hljs-keyword\"\u003eawait\u003c/span\u003e client.write_gatt_char(WRITE_CHAR, INIT_MESSAGE)\n\n        \u003cspan class=\"hljs-keyword\"\u003eawait\u003c/span\u003e asyncio.sleep(\u003cspan class=\"hljs-number\"\u003e4\u003c/span\u003e)\n\n        \u003cspan class=\"hljs-built_in\"\u003eprint\u003c/span\u003e(\u003cspan class=\"hljs-string\"\u003e'Closing connection.'\u003c/span\u003e)\n        \u003cspan class=\"hljs-keyword\"\u003eawait\u003c/span\u003e client.stop_notify(CHAR16)\n\n\n    \u003cspan class=\"hljs-keyword\"\u003eexcept\u003c/span\u003e Exception \u003cspan class=\"hljs-keyword\"\u003eas\u003c/span\u003e e:\n        \u003cspan class=\"hljs-built_in\"\u003eprint\u003c/span\u003e(e)\n    \u003cspan class=\"hljs-keyword\"\u003efinally\u003c/span\u003e:\n        \u003cspan class=\"hljs-keyword\"\u003eawait\u003c/span\u003e client.disconnect()\n\n\nasyncio.run(main())\n\u003c/code\u003e\u003c/pre\u003e\u003cp\u003e\u003cstrong\u003e🎉 I can now pause the fountain without the app.\u003c/strong\u003e\u003c/p\u003e\n\u003ch3\u003eApp display data\u003c/h3\u003e\n\u003cp\u003eThe next part of the fountain's interface that I want to reverse engineer is the data it sends to the app to be\ndisplayed. To do this, my plan is to capture the packet communication when the app starts up and compare the data to\nwhat I see in the app and the differences between runs.\u003c/p\u003e\n\u003cfigure\u003e\n\u003cimg src=\"/images/side-projects/cat-fountain/startup-data.png\" alt=\"startup-data.png\"\u003e\n\u003cfigcaption\u003eLooking at app startup packets.  The data that populates the apps.\u003c/figcaption\u003e\n\u003c/figure\u003e\n\n\u003cbr\u003e\n\n\n\u003cfigure\u003e\n\u003cimg src=\"/images/side-projects/cat-fountain/startup-comparisons.png\" alt=\"startup-comparisons.png\"\u003e\n\u003cfigcaption\u003eComparing a few startup communications with app states\u003c/figcaption\u003e\n\u003c/figure\u003e\n\n\u003cp\u003e\u003cstrong\u003e📌 I'm here now\u003c/strong\u003e\u003c/p\u003e\n\u003ch2\u003eExtra notes about packets\u003c/h2\u003e\n\u003cp\u003e\u003cstrong\u003eWhen the app connects, it sends these two every time.\u003c/strong\u003e\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"hljs\"\u003efafcfdd501000000fb\nfafcfd560101080000008767fea7039dfb\n\u003c/code\u003e\u003c/pre\u003e\u003cp\u003e\u003cstrong\u003eThe first signal seems to trigger this response:\u003c/strong\u003e\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"hljs\"\u003efafcfdd5020016000000000005f73b713230323430353135573231313237fb\n\u003c/code\u003e\u003c/pre\u003e\u003cp\u003e\u003cem\u003eI captured this same response value on two of the app init captures. The third init attempt didn't capture any response\nat this point.\u003c/em\u003e\u003c/p\u003e\n\u003cp\u003elike other data, it starts with \u003ccode\u003efafcfd\u003c/code\u003e\u003c/p\u003e\n\u003cp\u003eThe first byte seems to represent an identifier of what the rest of the data is for - like a command name or endpoint or\nsomething. Each response starts withe the same byte.\u003c/p\u003e\n\u003cp\u003eThe sequence when the app connects:\u003c/p\u003e\n\u003cul\u003e\n\u003cli\u003e\u003ccode\u003ed5\u003c/code\u003e\u003c/li\u003e\n\u003cli\u003e\u003ccode\u003e56\u003c/code\u003e\u003c/li\u003e\n\u003cli\u003e\u003ccode\u003e54\u003c/code\u003e\u003c/li\u003e\n\u003cli\u003e\u003ccode\u003ec8\u003c/code\u003e\u003c/li\u003e\n\u003cli\u003e\u003ccode\u003ec9\u003c/code\u003e\u003c/li\u003e\n\u003cli\u003e\u003ccode\u003ed3\u003c/code\u003e\u003c/li\u003e\n\u003cli\u003e\u003ccode\u003ed4\u003c/code\u003e\u003c/li\u003e\n\u003cli\u003e\u003ccode\u003ed7\u003c/code\u003e\u003c/li\u003e\n\u003cli\u003e\u003ccode\u003ed8\u003c/code\u003e\u003c/li\u003e\n\u003cli\u003e\u003cem\u003e(receives an \u003ccode\u003ee6\u003c/code\u003e response)\u003c/em\u003e\u003c/li\u003e\n\u003cli\u003e\u003ccode\u003ee6\u003c/code\u003e - \u003cem\u003efinal command, seems like an acknowledgment\u003c/em\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003cp\u003eThe next byte seems to be some sort of call/response sequence. The sender uses \u003ccode\u003e01\u003c/code\u003e and the replier uses \u003ccode\u003e02\u003c/code\u003e\u003c/p\u003e\n\u003cp\u003eThe next byte looks like a sequence that increments with each request.\u003c/p\u003e\n\u003cp\u003e\u003cstrong\u003efirst response (SEQ = 00)\u003c/strong\u003e\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"hljs\"\u003e1600000000000 5f73b7132303234303531355732313132 77\n1600000000000 5f73b7132303234303531355732313132 37\n\u003c/code\u003e\u003c/pre\u003e\u003cp\u003e\u003cstrong\u003e3rd command (only one that's different between two two runs i'm looking at)\u003c/strong\u003e\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"hljs\"\u003e070000 2e82 5340 0800\n070000 2e8b 25a4 0800\n\u003c/code\u003e\u003c/pre\u003e\u003cp\u003e\u003cstrong\u003e5th response (SEQ = 05)\u003c/strong\u003e\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"hljs\"\u003e18000000000000000000 0019ea6c0019df14 0000000000000000\n18000000000000000000 0022b92c0022b160 0000000000000000\n\u003c/code\u003e\u003c/pre\u003e\u003cp\u003e\u003cstrong\u003e6th response\u003c/strong\u003e\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"hljs\"\u003e10000101 0000000000 19df1422 010000 007f\n10000101 0000000000 22b1600c 010000 e9e7\n\u003c/code\u003e\u003c/pre\u003e\u003cp\u003e\u003cstrong\u003efinal response\u003c/strong\u003e\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"hljs\"\u003e98 1e0001010000000000 19df16220100000081 03030102000005a0000528010000\na5 1e0001010000000000 22b1610c010000e9e8 03030102000005a0000528010000\n\u003c/code\u003e\u003c/pre\u003e"}},"__N_SSG":true},"page":"/lab/[slug]","query":{"slug":"cat-fountain"},"buildId":"YRmuQkL-rFJD9PCMqgsSV","isFallback":false,"gsp":true,"scriptLoader":[]}</script></body></html>
