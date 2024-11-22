@@ -1,27 +1,34 @@
-import Link from "next/link";
+import { Link } from "./link";
 
 export function Header() {
   return (
-    <header>
+    <header className="mt-8 mb-2 border-b-4 pb-0.5">
       <div>
-        <h1>Steve Saylor </h1>
-        <div className="tight">full-stack developer, civic technologist</div>
+        <h1 className="text-5xl font-bold">Steve Saylor </h1>
+        <div className="mt-2 italic text-stone-700">
+          full-stack developer, civic technologist
+        </div>
       </div>
-      <nav className="mainNav">
-        <ul>
+
+      <nav className="border-b-2 py-[2ch]">
+        <ul className="flex gap-4">
           <li>
-            <Link href="/" aria-current="page">
-              Home
+            <Link href="/">Home</Link>
+          </li>
+          <li>
+            <Link href="/portfolio" icon="💼">
+              Portfolio
             </Link>
           </li>
           <li>
-            <Link href="/portfolio">Portfolio</Link>
+            <Link href="/lab" icon="🧪">
+              Side Projects
+            </Link>
           </li>
           <li>
-            <Link href="/lab">Side Projects</Link>
-          </li>
-          <li>
-            <Link href="/bit">😼Bit</Link>
+            <Link href="/bit" icon="😼">
+              Bit
+            </Link>
           </li>
         </ul>
       </nav>

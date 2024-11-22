@@ -1,7 +1,8 @@
 import { ModalImage } from "@/components/modal-image";
 import markdownit from "markdown-it";
 import { ProjectCardProps } from "@/types";
-import Link from "next/link";
+import { Link } from "./link";
+import { DD, DL, DT } from "@/components/dl";
 
 export function ProjectCard({
   slug,
@@ -18,70 +19,75 @@ export function ProjectCard({
   const descriptionHTML = md.render(description);
 
   return (
-    <article className="card">
-      <h2 id={slug}>
-        {titleLink ? <Link href={titleLink}>{title}</Link> : title}
-      </h2>
-      <div dangerouslySetInnerHTML={{ __html: descriptionHTML }}></div>
-      <dl>
-        {!!link && (
-          <>
-            <dt>Location</dt>
-            <dd>
-              <a href={link.url} target="_blank">
-                {link.label ?? link.url}
-              </a>
-            </dd>
-          </>
-        )}
+    <article className="border-l-4 lg:-ml-4 pl-0.5 ">
+      <div className="border-l-2 pl-2 lg:pl-4 py-[0ch]">
+        <h2 className="text-2xl mb-4 font-bold" id={slug}>
+          {titleLink ? <Link href={titleLink}>{title}</Link> : title}
+        </h2>
+        <div dangerouslySetInnerHTML={{ __html: descriptionHTML }}></div>
+        <DL>
+          {!!link && (
+            <>
+              <DT>Location</DT>
+              <DD>
+                <Link href={link.url} target="_blank">
+                  {link.label ?? link.url}
+                </Link>
+              </DD>
+            </>
+          )}
 
-        {!!repo && (
-          <>
-            <dt>Code</dt>
-            <dd>
-              <a href={repo} target={"_blank"} rel="noopener noreferrer">
-                {repo}
-              </a>
-            </dd>
-          </>
-        )}
+          {!!repo && (
+            <>
+              <DT>Code</DT>
+              <DD>
+                <Link href={repo} target="_blank">
+                  {repo}
+                </Link>
+              </DD>
+            </>
+          )}
 
-        {!!stack && (
-          <>
-            <dt>Stack</dt>
-            <dd>
-              <ul className="inline-list">
-                {stack.map((item) => (
-                  <li key={`${item.label}-${item.url}`}>
-                    <a
-                      href={item.url}
-                      target={
-                        item.url.startsWith("http") ? "_blank" : undefined
-                      }
-                      rel="noopener noreferrer"
-                    >
-                      {item.label}
-                    </a>
-                  </li>
+          {!!stack && (
+            <>
+              <DT>Stack</DT>
+              <DD>
+                <ul className="flex gap-[2ch]">
+                  {stack.map((item) => (
+                    <li key={`${item.label}-${item.url}`}>
+                      <Link
+                        href={item.url}
+                        target={
+                          item.url.startsWith("http") ? "_blank" : undefined
+                        }
+                      >
+                        {item.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </DD>
+            </>
+          )}
+
+          {!!screenshots && !!screenshots.length && (
+            <>
+              <DT>Screenshots</DT>
+              <DD>
+                {screenshots.map(({ alt, src }) => (
+                  <ModalImage key={src} alt={alt} src={src} />
                 ))}
-              </ul>
-            </dd>
-          </>
-        )}
+              </DD>
+            </>
+          )}
+        </DL>
 
-        {!!screenshots && !!screenshots.length && (
-          <>
-            <dt>Screenshots</dt>
-            <dd>
-              {screenshots.map(({ alt, src }) => (
-                <ModalImage key={src} alt={alt} src={src} />
-              ))}
-            </dd>
-          </>
+        {!!titleLink && (
+          <div className="mt-[2ch]">
+            <Link href={titleLink}>Read more</Link>
+          </div>
         )}
-      </dl>
-
-      {!!titleLink && <a href={titleLink}>Read more</a>}
+      </div>
     </article>
   );
 }
