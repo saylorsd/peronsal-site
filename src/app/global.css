@@ -32,6 +32,10 @@ th {
   @apply border-4;
 }
 
+.content dialog figure {
+  @apply mx-0 max-w-full;
+}
+
 .content figure figcaption {
   @apply border-t-4;
   @apply p-[1ch];

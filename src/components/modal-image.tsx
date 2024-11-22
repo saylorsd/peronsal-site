@@ -30,21 +30,22 @@ export function ModalImage({ src, alt, caption }: ModalImageProps) {
       </button>
 
       <dialog
-        className="fixed container max-w-6xl z-20 m-auto backdrop:bg-black/20 backdrop:backdrop-blur-sm"
+        className="fixed size-3/4 z-20 m-auto backdrop:bg-black/20 backdrop:backdrop-blur-sm"
         ref={dialogRef}
         onClick={handleClose}
       >
-        <figure className="border-4">
-          <Image src={stripe} className="object-cover -z-20" fill alt="" />
-
-          <div className="relative max-w-1/2 aspect-square mx-auto">
-            <Image
-              src={src}
-              alt={alt}
-              className="object-contain"
-              fill
-              quality={100}
-            />
+        <figure className="h-full w-full flex flex-col">
+          <div className="relative flex flex-col flex-grow  p-[2ch] lg:p-[4ch]">
+            <Image src={stripe} className="object-center -z-20" fill alt="" />
+            <div className="relative flex-grow h-full ">
+              <Image
+                src={src}
+                alt={alt}
+                className="object-contain"
+                fill
+                quality={100}
+              />
+            </div>
           </div>
           <figcaption className="border-t-4 bg-white p-[1ch]">
             {caption ?? alt}
