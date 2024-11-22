@@ -9,5 +9,5 @@ export function DD(props: HTMLProps<HTMLElement>) {
 }
 
 export function DT(props: HTMLProps<HTMLElement>) {
-  return <dt className="font-bold mt-[1ch]" {...props} />;
+  return <dt className="font-bold" {...props} />;
 }

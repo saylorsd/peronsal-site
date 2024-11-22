@@ -45,8 +45,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${mono.variable} `}>
-      <body>
-        <div className="container mx-auto max-w-3xl">
+      <body className="pb-12">
+        <div className="container mx-auto max-w-3xl  px-[1ch]">
           <Header />
           <main className="mt-12">{children}</main>
         </div>

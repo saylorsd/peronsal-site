@@ -108,28 +108,38 @@ export default function BitPage() {
         <DL>
           <DT>Species</DT>
           <DD style={{ fontStyle: "italic" }}>Felus catus</DD>
-          <DT>Posture</DT>
-          <DD>loafy</DD>
-          <DT>Kills</DT>
-          <DD>1x🐁; ?x🐛</DD>
         </DL>
+
         <DL>
           <DT>Born</DT>
           <DD>April, 2019</DD>
-          <DT>Behavior</DT>
-          <DD>precocious, cudDLy</DD>
         </DL>
         <DL>
           <DT>Coat</DT>
           <DD>black, scruffly</DD>
+        </DL>
+        <DL>
+          <DT>Posture</DT>
+          <DD>loafy</DD>
+        </DL>
 
+        <DL>
+          <DT>Behavior</DT>
+          <DD>precocious, cuddLy</DD>
+        </DL>
+
+        <DL>
           <DT>Breath</DT>
           <DD>stinky</DD>
+        </DL>
+        <DL>
+          <DT>Kills</DT>
+          <DD>1x🐁; ?x🐛</DD>
         </DL>
       </div>
 
       <h2>Photos</h2>
-      <div className="grid grid-cols-2 gap-[2ch]">
+      <div className="flex flex-col items-center md:grid md:grid-cols-2 gap-[2ch]">
         {images.map((image) => (
           <div key={image.alt}>
             <ModalImage

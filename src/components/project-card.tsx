@@ -19,40 +19,43 @@ export function ProjectCard({
   const descriptionHTML = md.render(description);
 
   return (
-    <article className="border-l-4 lg:-ml-4 pl-0.5 ">
+    <article className="border-l-4 w-full overflow-x-hidden lg:-ml-4 pl-0.5 ">
       <div className="border-l-2 pl-2 lg:pl-4 py-[0ch]">
         <h2 className="text-2xl mb-4 font-bold" id={slug}>
           {titleLink ? <Link href={titleLink}>{title}</Link> : title}
         </h2>
-        <div dangerouslySetInnerHTML={{ __html: descriptionHTML }}></div>
-        <DL>
+        <div
+          className="content"
+          dangerouslySetInnerHTML={{ __html: descriptionHTML }}
+        ></div>
+        <div className="flex flex-col space-y-[2ch]">
           {!!link && (
-            <>
+            <DL>
               <DT>Location</DT>
               <DD>
                 <Link href={link.url} target="_blank">
                   {link.label ?? link.url}
                 </Link>
               </DD>
-            </>
+            </DL>
           )}
 
           {!!repo && (
-            <>
+            <DL>
               <DT>Code</DT>
               <DD>
                 <Link href={repo} target="_blank">
                   {repo}
                 </Link>
               </DD>
-            </>
+            </DL>
           )}
 
           {!!stack && (
-            <>
+            <DL>
               <DT>Stack</DT>
               <DD>
-                <ul className="flex gap-[2ch]">
+                <ul className="grid grid-cols-2 md:flex md:gap-x-[2ch]">
                   {stack.map((item) => (
                     <li key={`${item.label}-${item.url}`}>
                       <Link
@@ -67,7 +70,7 @@ export function ProjectCard({
                   ))}
                 </ul>
               </DD>
-            </>
+            </DL>
           )}
 
           {!!screenshots && !!screenshots.length && (
@@ -80,7 +83,7 @@ export function ProjectCard({
               </DD>
             </>
           )}
-        </DL>
+        </div>
 
         {!!titleLink && (
           <div className="mt-[2ch]">
