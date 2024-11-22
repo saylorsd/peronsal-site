@@ -6,7 +6,8 @@ export function Header() {
       <div>
         <h1 className="text-5xl font-bold">Steve Saylor </h1>
         <div className="mt-2 italic text-stone-700">
-          full-stack developer, civic technologist
+          <span className="block lg:inline">full-stack developer,</span>{" "}
+          <span className="block lg:inline">civic technologist</span>
         </div>
       </div>
 
