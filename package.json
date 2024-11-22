@@ -16,9 +16,10 @@
     "markdown-it": "^14.1.0",
     "marked": "^15.0.0",
     "marked-highlight": "^2.2.1",
-    "next": "14.2.13",
+    "next": "15.0.3",
     "react": "^18",
     "react-dom": "^18",
+    "sharp": "^0.33.5",
     "yaml": "^2.6.0"
   },
   "devDependencies": {
@@ -28,7 +29,7 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "eslint": "^8",
-    "eslint-config-next": "14.2.13",
+    "eslint-config-next": "15.0.3",
     "prettier": "^3.3.3",
     "typescript": "^5"
   }

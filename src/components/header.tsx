@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export function Header() {
   return (
     <header>
@@ -8,18 +10,18 @@ export function Header() {
       <nav className="mainNav">
         <ul>
           <li>
-            <a href="/" aria-current="page">
+            <Link href="/" aria-current="page">
               Home
-            </a>
+            </Link>
           </li>
           <li>
-            <a href="/portfolio">Portfolio</a>
+            <Link href="/portfolio">Portfolio</Link>
           </li>
           <li>
-            <a href="/lab">Side Projects</a>
+            <Link href="/lab">Side Projects</Link>
           </li>
           <li>
-            <a href="/bit">😼Bit</a>
+            <Link href="/bit">😼Bit</Link>
           </li>
         </ul>
       </nav>

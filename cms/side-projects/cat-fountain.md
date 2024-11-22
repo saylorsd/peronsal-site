@@ -30,7 +30,7 @@ using [Nordic's desktop software](https://www.nordicsemi.com/Products/Developmen
 
 <figure>
 <img alt="NRF dongle sniffing away" height="400px" src="/images/side-projects/cat-fountain/nrf.gif"/>
-<figcaption>NRF dongle sniffing packets</figcaption>
+<figcaption>nRF dongle sniffing packets</figcaption>
 </figure>
 
 With the sniffer running in wireshark without any further filtering, I was looking at a firehose of all the bluetooth

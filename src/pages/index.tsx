@@ -27,14 +27,14 @@ export default function HomePage() {
                   Western Pennsylvania Regional Data Center
                 </a>
               </div>
-              <div className="">
-                <a href="https://www.pitt.edu" target="_blank">
-                  University of Pittsburgh
-                </a>
-              </div>
               <div className="tight">
                 <a href="https://ucsur.pitt.edu/">
                   Center for Social and Urban Research
+                </a>
+              </div>
+              <div className="">
+                <a href="https://www.pitt.edu" target="_blank">
+                  University of Pittsburgh
                 </a>
               </div>
             </td>

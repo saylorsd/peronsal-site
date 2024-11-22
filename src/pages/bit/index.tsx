@@ -57,8 +57,9 @@ export default function BitPage() {
     <article className="content">
       <div className="hero">
         <h1>Bit</h1>
-        <p>My pet cat</p>
       </div>
+      <p>My pet cat</p>
+
       <div
         style={{
           position: "relative",

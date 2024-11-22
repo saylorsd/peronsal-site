@@ -1,9 +1,10 @@
 import { getSideProjects } from "@/api";
 import { ProjectCard } from "@/components/project-card";
+import { InferGetStaticPropsType } from "next";
 
-export default async function LabPage() {
-  const projects = await getSideProjects();
-
+export default function LabPage({
+  projects,
+}: InferGetStaticPropsType<typeof getStaticProps>) {
   return (
     <article>
       <div className="hero">
@@ -21,4 +22,12 @@ export default async function LabPage() {
       </ul>
     </article>
   );
+}
+
+export async function getStaticProps() {
+  const projects = await getSideProjects();
+
+  return {
+    props: { projects },
+  };
 }

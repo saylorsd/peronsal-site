@@ -1,5 +1,3 @@
-"use server";
-
 import { promises as fs } from "fs";
 import fm from "front-matter";
 import YAML from "yaml";

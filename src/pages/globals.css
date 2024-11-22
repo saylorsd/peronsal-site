@@ -34,8 +34,8 @@ Based on https://github.com/owickstrom/the-monospace-web
     -45deg,
     var(--background-color),
     var(--background-color) 10px,
-    rgb(82, 82, 91, 0.15) 10px,
-    rgb(82, 82, 91, 0.15) 25px
+    rgb(82, 82, 91, 0.25) 10px,
+    rgb(82, 82, 91, 0.25) 25px
   );
 
 
@@ -688,8 +688,12 @@ main {
 
 .hero > h1 {
   margin: 0;
+  background: rgba(255, 255, 255, 0.5);
+
 }
 
 .hero > p {
   font-style: italic;
+  margin: auto;
+  background: rgba(255, 255, 255, 0.5);
 }
