@@ -124,7 +124,7 @@ export default function BitPage() {
 
         <DL>
           <DT>Behavior</DT>
-          <DD>precocious, cuddLy</DD>
+          <DD>precocious, cuddly</DD>
         </DL>
 
         <DL>
