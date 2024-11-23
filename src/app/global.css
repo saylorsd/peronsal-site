@@ -4,6 +4,7 @@ body {
   @apply font-mono;
   @apply font-normal;
   @apply text-stone-900;
+  @apply bg-white;
 }
 
 @theme {
