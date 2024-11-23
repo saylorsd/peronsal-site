@@ -18,10 +18,9 @@ export default async function WorkPage() {
           help us leverage open data.
         </p>
         <p>
-          I also make things with researchers, providing my skills in data
+          I also make things with researchers, sharing my skills in data
           communication and application development.
         </p>
-
         <p>Below is a sample of some of my professional work.</p>
       </div>
 

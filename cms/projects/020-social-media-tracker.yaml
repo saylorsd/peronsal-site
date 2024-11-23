@@ -1,8 +1,8 @@
 slug: social-media-tracker
 title: Social Media Election Policies Tracker
 description: |
-  The Social Media Election Policy Tracker is a tool built with Pitt Cyber to broadly chronicle a timeline of selected social media
-  companies’ evolving policies which have impacted the information environment related to U.S. elections and campaigns from 2016 – the present.
+  The Social Media Election Policy Tracker is a tool built with researchers at  [Pitt Cyber](https://cyber.pitt.edu) to "broadly chronicle a timeline of selected social media
+  companies’ evolving policies which have impacted the information environment related to U.S. elections and campaigns from 2016 – the present."
 
 link:
   url: https://apps.cyber.pitt.edu/social-media-election-policies
@@ -15,3 +15,6 @@ stack:
     url: https://nextjs.org/docs
   - label: React Aria
     url: https://react-spectrum.adobe.com/react-aria/index.html
+press:
+  - label: Tech Policy Press - Tracking Social Media Platforms’ Fluctuating Approaches to US Elections
+    url: https://www.techpolicy.press/tracking-social-media-platforms-fluctuating-approaches-to-us-elections/

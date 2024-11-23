@@ -95,9 +95,8 @@ export default function BitPage() {
       <p>
         Max moved up to my Mom&apos;s as soon as he was ready. However, I
         couldn&apos;t adopt the girls for another month while I moved out of my
-        apartment. During that time, Bit&apos;s sister, who was having
-        development troubles, was seriously injured during a bout of kitten
-        rough-housing and had to be euthanized.
+        apartment. Sadly, Bit&apos;s sister, who was failing to thrive, got hurt
+        during those early months and had to be euthanized.
       </p>
       <p>
         At the end of that summer, Bit moved in with me and we&apos;ve been best

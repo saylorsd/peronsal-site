@@ -12,6 +12,7 @@ export function ProjectCard({
   stack,
   screenshots,
   link,
+  press,
   titleLink,
 }: ProjectCardProps) {
   const md = markdownit();
@@ -57,6 +58,28 @@ export function ProjectCard({
               <DD>
                 <ul className="grid grid-cols-2 md:flex md:gap-x-[2ch]">
                   {stack.map((item) => (
+                    <li key={`${item.label}-${item.url}`}>
+                      <Link
+                        href={item.url}
+                        target={
+                          item.url.startsWith("http") ? "_blank" : undefined
+                        }
+                      >
+                        {item.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </DD>
+            </DL>
+          )}
+
+          {!!press && !!press.length && (
+            <DL>
+              <DT>In the Press</DT>
+              <DD>
+                <ul className="grid grid-cols-2 md:flex md:gap-x-[2ch]">
+                  {press.map((item) => (
                     <li key={`${item.label}-${item.url}`}>
                       <Link
                         href={item.url}

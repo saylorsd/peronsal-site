@@ -22,6 +22,7 @@ export interface CMSMetaBase {
 export interface CMSProjectMeta extends CMSMetaBase {
   stack: CMSLinkProps[];
   repo: string;
+  press: CMSLinkProps[];
 }
 
 export interface CMSSideProjectMeta extends CMSMetaBase {

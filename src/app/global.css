@@ -43,7 +43,7 @@ th {
 }
 
 .content a {
-  @apply underline hover:bg-cyan-200 font-bold;
+  @apply underline hover:bg-cyan-200 font-bold decoration-2 text-stone-700;
 }
 
 .content h2 {
