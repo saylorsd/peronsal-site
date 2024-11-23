@@ -2,7 +2,6 @@
 
 import { useRef } from "react";
 import Image, { ImageProps } from "next/image";
-import stripe from "@/assets/img.png";
 
 export interface ModalImageProps {
   src: ImageProps["src"];
