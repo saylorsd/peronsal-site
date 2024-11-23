@@ -30,19 +30,18 @@ export function ModalImage({ src, alt, caption }: ModalImageProps) {
       </button>
 
       <dialog
-        className="fixed w-full aspect-square lg:w-3/4 lg:h-3/4 z-20 m-auto backdrop:bg-black/20 backdrop:backdrop-blur-sm "
+        className="fixed z-20 aspect-square lg:aspect-[4/3] w-full lg:w-fit lg:h-3/4 m-auto backdrop:bg-black/20 backdrop:backdrop-blur-sm "
         ref={dialogRef}
         onClick={handleClose}
       >
-        <figure className="h-full w-full flex flex-col">
-          <div className="relative flex flex-col flex-grow  p-[2ch] lg:p-[4ch]">
-            <Image src={stripe} className="object-center -z-20" fill alt="" />
-            <div className="relative flex-grow">
+        <figure className="size-full flex flex-col">
+          <div className="flex flex-grow flex-col p-[2ch] lg:p-[4ch] bg-[url('/images/stripe.png')]">
+            <div className="relative size-full">
               <Image
                 src={src}
                 alt={alt}
                 fill
-                style={{ objectFit: "contain" }}
+                style={{ objectFit: "scale-down" }}
                 quality={100}
               />
             </div>
