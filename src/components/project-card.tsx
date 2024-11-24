@@ -20,8 +20,8 @@ export function ProjectCard({
   const descriptionHTML = md.render(description);
 
   return (
-    <article className="border-l-4 w-full overflow-x-hidden lg:-ml-4 pl-0.5 ">
-      <div className="border-l-2 pl-2 lg:pl-4 py-[0ch]">
+    <article className="border-l-4 w-full overflow-x-hidden  pl-0.5 ">
+      <div className="border-l-2 pl-2 lg:pl-4 py-[0.5ch] border border-stone-100 border-l-current border-dashed ">
         <h2 className="text-2xl mb-4 font-bold" id={slug}>
           {titleLink ? <Link href={titleLink}>{title}</Link> : title}
         </h2>
