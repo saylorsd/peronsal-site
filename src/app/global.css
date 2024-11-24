@@ -51,7 +51,12 @@ th {
 }
 
 .content a {
-  @apply underline hover:bg-cyan-200 font-bold decoration-2 text-stone-700;
+
+  @apply underline hover:decoration-2;
+
+  @apply hover:bg-[url('/images/stripe-small2.png')] hover:animate-bg-slide;
+  @apply hover:text-black;
+  @apply hover:ring-1 ring-cyan-50;
 }
 
 .content h2 {

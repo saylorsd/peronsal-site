@@ -12,10 +12,10 @@ export function Link({ children, target, href }: LinkProps) {
   return (
     <NextLink
       href={href}
-      className="hover:bg-[url('/images/stripe-small.png')] hover:animate-bg-slide hover:font-bold hover:ring-1 ring-cyan-100"
+      className="hover:bg-[url('/images/stripe-small2.png')] hover:animate-bg-slide hover:text-black hover:ring-1 ring-cyan-50"
       target={target}
     >
-      <span className="underline hover:decoration-2 hover:decoration-off text-ellipsis">
+      <span className="underline hover:decoration-2 text-ellipsis">
         {children}
       </span>
     </NextLink>
