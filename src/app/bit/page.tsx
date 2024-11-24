@@ -93,7 +93,7 @@ export default function BitPage() {
         a bonded pair while my mom was looking for a singleton.
       </p>
       <p>
-        Max moved up to my Mom&apos;s as soon as he was ready. However, I
+        Max moved up to my mom&apos;s as soon as he was ready. However, I
         couldn&apos;t adopt the girls for another month while I moved out of my
         apartment. Sadly, Bit&apos;s sister, who was failing to thrive, got hurt
         during those early months and had to be euthanized.
