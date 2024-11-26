@@ -118,6 +118,12 @@ export default function BitPage() {
           <DD>black, scruffly</DD>
         </DL>
         <DL>
+          <DT>Weight Class</DT>
+          <DD>
+            Bean <span className="text-stone-400">(&lt; 9lbs)</span>
+          </DD>
+        </DL>
+        <DL>
           <DT>Posture</DT>
           <DD>loafy</DD>
         </DL>
