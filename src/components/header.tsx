@@ -26,11 +26,6 @@ export function Header() {
               Side Projects
             </Link>
           </li>
-          <li>
-            <Link href="/bit" icon="😼">
-              Bit
-            </Link>
-          </li>
         </ul>
       </nav>
     </header>

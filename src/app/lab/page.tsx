@@ -15,7 +15,15 @@ export default async function LabPage() {
 
       <Subtitle>Stuff I&apos;ve made for fun</Subtitle>
 
-      <ul className="article-list">
+      <ul className="my-[2ch] flex flex-col gap-[4ch]">
+        <li>
+          <ProjectCard
+            slug="bit-page"
+            title="Bit's Page"
+            description="A little webpage about my cat, Bit. It's a place to keep some good pictures of her, and a useful sandbox for designing this site."
+            titleLink="/bit"
+          />
+        </li>
         {projects.map((item) => (
           <li key={item.slug}>
             <ProjectCard {...item} titleLink={`lab/${item.slug}`} />
